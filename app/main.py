@@ -1,52 +1,42 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import List, Optional
+from . import crud, models
 
-books = {}
+app = FastAPI(title="Library Management System - Phase 1")
 
-app = FastAPI()
-
-@app.get("/health")
-def health() -> dict:
+@app.get("/")
+def root() -> dict:
+    """
+    Health check endpoint for the API.
+    """
     return {"status": "OK"}
 
-@app.post("/add-book")
-def add_book(book_id: int, book_title: str, book_author: str,
-                book_year: int, book_description: str | None = None) -> dict:
-    if book_id in books:
-        return {"Error": "We already have the book!"}
-    
-    books[book_id] = {"title": book_title, "author": book_author,
-                        "year": book_year, "description": book_description}
-    return {"status": "OK"}
+@app.post("/books")
+def create_book(book: models.BookCreate) -> models.Book:
+    return crud.create_book(book)
 
-@app.get("/get-book/{book_id}")
-def get_book(book_id: int) -> dict:
-    if book_id not in books:
-        return {"Error": "We don't have the book!"}
-    
-    return books[book_id]
+@app.get("/books")
+def list_all_books() -> List[models.Book]:
+    return crud.list_books()
 
-@app.delete("/delete-book/{book_id}")
+@app.get("/books/{book_id}")
+def get_book(book_id: int) -> models.Book:
+    found = crud.get_book(book_id)
+    if found is None:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return found
+
+@app.put("/books/{book_id}")
+def update_book(book_id: int, payload: models.BookUpdate) -> models.Book:
+    updated = crud.update_book(book_id=book_id, updates=payload)
+    if updated is None:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return updated
+
+@app.delete("/books/{book_id}")
 def delete_book(book_id: int) -> dict:
-    if book_id not in books:
-        return {"Error": "The book doesn't exist!"}
-    
-    del books[book_id]
-    return {"status": "OK"}
-
-@app.put("/update-book/{book_id}")
-def update_book(book_id: int, book_title: str | None = None,
-                book_author: str | None = None, book_year: int | None = None,
-                book_description: str | None = None) -> dict:
-    if book_id not in books:
-        return {"Error": "The book doesn't exist!"}
-    
-    if book_title is not None:
-        books[book_id]["title"] = book_title
-    if book_author is not None:
-        books[book_id]["author"] = book_author
-    if book_year is not None:
-        books[book_id]["year"] = book_year
-    if book_description is not None:
-        books[book_id]["description"] = book_description
-    
+    ok = crud.delete_book(book_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Book not found")
     return {"status": "OK"}
