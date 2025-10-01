@@ -31,7 +31,7 @@ This is a small project where I’m building a **Library Management System** ste
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/library-management-system.git
+git clone https://github.com/ParsaNaderiX/library-management-system.git
 cd library-management-system
 ```
 
@@ -79,7 +79,7 @@ library-management-system/
 
 ## Project Roadmap
 
-* **Phase 1:** Basic CRUD (with in-memory storage)
+* **Phase 1:** Basic CRUD (with in-memory storage) -> Done!
 * **Phase 2:** Database integration
 * **Phase 3:** User accounts & authentication
 * **Phase 4:** Advanced features: search, filtering, pagination
